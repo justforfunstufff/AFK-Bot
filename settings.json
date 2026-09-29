@@ -1,13 +1,13 @@
 {
   "name": "AFK Bot",
   "bot-account": {
-    "username": "LodaLele",
+    "username": "KavikaBAAP",
     "password": "",
     "type": "offline"
   },
   "server": {
-    "ip": "goodname.aternos.me",
-    "port": 50839,
+    "ip": "DesiDaruSastiWali.aternos.me",
+    "port": 23237,
     "version": "1.21.1"
   },
   "position": {
