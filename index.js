@@ -378,17 +378,25 @@ function createBot() {
     });
 
 
-        // ---------- RESOURCE PACK HANDLING ----------
-    bot.on('resourcePack', (...args) => {
-      console.log('[ResourcePack] Server requested a pack:', args);
+    bot._client.on('add_resource_pack', (packet) => {
+  console.log('[ResourcePack] Received pack request');
 
-      if (typeof bot.acceptResourcePack === 'function') {
-        bot.acceptResourcePack();
-        console.log('[ResourcePack] Acceptance sent');
-      } else {
-        console.log('[ResourcePack] Acceptance API unavailable');
-      }
+  for (const result of [3, 0]) {
+    bot._client.write('resource_pack_receive', {
+      uuid: packet.uuid,
+      result
     });
+  }
+
+  console.log('[ResourcePack] Pack accepted and loaded');
+});
+
+bot._client.on('resource_pack_send', (packet) => {
+  bot._client.write('resource_pack_receive', {
+    hash: packet.hash,
+    result: 3
+  });
+});
 
     bot.loadPlugin(pathfinder);
 
