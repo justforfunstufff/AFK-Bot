@@ -377,6 +377,19 @@ function createBot() {
       checkTimeoutInterval: 120000 // 2 minutes - detects dead connections without false-positive disconnects
     });
 
+
+        // ---------- RESOURCE PACK HANDLING ----------
+    bot.on('resourcePack', (...args) => {
+      console.log('[ResourcePack] Server requested a pack:', args);
+
+      if (typeof bot.acceptResourcePack === 'function') {
+        bot.acceptResourcePack();
+        console.log('[ResourcePack] Acceptance sent');
+      } else {
+        console.log('[ResourcePack] Acceptance API unavailable');
+      }
+    });
+
     bot.loadPlugin(pathfinder);
 
     // Connection timeout - if no spawn in 60s, reconnect
