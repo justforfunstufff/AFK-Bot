@@ -6,7 +6,7 @@
     "type": "offline"
   },
   "server": {
-    "ip": "TheCelestia-SMP.aternos.me:61015",
+    "ip": "TheCelestia-SMP.aternos.me",
     "port": 61015,
     "version": "1.21.1"
   },
