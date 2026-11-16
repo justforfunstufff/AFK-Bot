@@ -1,13 +1,13 @@
 {
   "name": "AFK Bot",
   "bot-account": {
-    "username": "afker",
+    "username": "Server-Bot",
     "password": "",
     "type": "offline"
   },
   "server": {
-    "ip": "desidarusastiwali.aternos.me",
-    "port": 23237,
+    "ip": "TheCelestia-SMP.aternos.me:61015",
+    "port": 61015,
     "version": "1.21.1"
   },
   "position": {
