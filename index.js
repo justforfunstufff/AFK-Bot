@@ -300,8 +300,8 @@ function addInterval(callback, delay) {
 
 function getReconnectDelay() {
   const baseDelay = config.utils['auto-reconnect-delay'] || 2000;
-  const maxDelay = config.utils['max-reconnect-delay'] || 15000;
-  return Math.min(baseDelay + botState.reconnectAttempts * 1000, maxDelay);
+  const maxDelay = 5 * 60 * 1000; // up to 5 minutes between attempts
+  return Math.min(baseDelay * Math.pow(2, Math.min(botState.reconnectAttempts, 8)), maxDelay);
 }
 
 // ============================================================
@@ -359,28 +359,43 @@ function setupResourcePack(b) {
 // ============================================================
 function setupAuth(b) {
   let authDone = false;
+  const t0 = Date.now();
+
+  const sendAuth = (cmd) => {
+    if (bot !== b) return;
+    b.chat(cmd);
+    console.log('[Auth] Sent:', cmd.split(' ')[0]);
+  };
+  const loginCmd = `/login ${AUTH_PASSWORD}`;
+  const registerCmd = `/register ${AUTH_PASSWORD} ${AUTH_PASSWORD}`;
 
   b.on('messagestr', (msg) => {
+    // Debug: show what the server says during the first 30s after connecting
+    if (Date.now() - t0 < 30000) console.log('[Server]', msg);
+
     if (authDone) return;
     const m = msg.toLowerCase();
 
-    if (m.includes('/register')) {
+    // EasyAuth may send plain text or translation keys, so match bare words
+    if (m.includes('register')) {
       authDone = true;
-      setTimeout(() => {
-        if (bot === b) {
-          b.chat(`/register ${AUTH_PASSWORD} ${AUTH_PASSWORD}`);
-          console.log('[Auth] Register sent');
-        }
-      }, 1000);
-    } else if (m.includes('/login')) {
+      setTimeout(() => sendAuth(registerCmd), 1000);
+    } else if (m.includes('login')) {
       authDone = true;
-      setTimeout(() => {
-        if (bot === b) {
-          b.chat(`/login ${AUTH_PASSWORD}`);
-          console.log('[Auth] Login sent');
-        }
-      }, 1000);
+      setTimeout(() => sendAuth(loginCmd), 1000);
     }
+  });
+
+  // Fallback: if no recognizable prompt arrives, try both commands.
+  // Only the one that applies will work; the other is harmless.
+  b.once('login', () => {
+    setTimeout(() => {
+      if (authDone || bot !== b) return;
+      authDone = true;
+      console.log('[Auth] No prompt detected, trying fallback');
+      sendAuth(loginCmd);
+      setTimeout(() => sendAuth(registerCmd), 1500);
+    }, 3000);
   });
 
   // Log creative mode success (optional info)
@@ -504,10 +519,7 @@ function createBot() {
     });
 
     thisBot.on('kicked', (reason) => {
-      console.log(
-        '[KICK]',
-        typeof reason === 'string' ? reason : JSON.stringify(reason, null, 2)
-      );
+      console.log('[KICK]', typeof reason === 'string' ? reason : JSON.stringify(reason));
     });
 
     thisBot.on('error', (err) => {
